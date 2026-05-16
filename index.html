@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucknow Lead Gen Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #06060e;
+    --bg-secondary: #0d0d1a;
+    --bg-card: #13132a;
+    --bg-card-hover: #1a1a38;
+    --border: #1e1e40;
+    --border-light: #2a2a55;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888b0;
+    --text-muted: #555580;
+    --green: #00e676;
+    --green-dim: rgba(0, 230, 118, 0.1);
+    --green-glow: 0 0 25px rgba(0, 230, 118, 0.25);
+    --yellow: #ffd54f;
+    --yellow-dim: rgba(255, 213, 79, 0.1);
+    --red: #ff5252;
+    --red-dim: rgba(255, 82, 82, 0.1);
+    --blue: #448aff;
+    --blue-dim: rgba(68, 138, 255, 0.1);
+    --blue-glow: 0 0 25px rgba(68, 138, 255, 0.2);
+    --purple: #b388ff;
+    --purple-dim: rgba(179, 136, 255, 0.1);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Animated Background ─── */
+  .bg-grid {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .bg-particles {
+    position: fixed; inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: rgba(0,230,118,0.3);
+    border-radius: 50%;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(80px);
+    animation: orbFloat 12s ease-in-out infinite;
+  }
+  .glow-orb.g1 { width: 500px; height: 500px; top: -200px; right: -100px; background: rgba(0,230,118,0.04); }
+  .glow-orb.g2 { width: 400px; height: 400px; bottom: -150px; left: -100px; background: rgba(68,138,255,0.04); animation-delay: -4s; }
+  .glow-orb.g3 { width: 350px; height: 350px; top: 40%; left: 40%; background: rgba(179,136,255,0.03); animation-delay: -8s; }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(80px, -60px) scale(1.1); }
+    66% { transform: translate(-40px, 40px) scale(0.9); }
+  }
+
+  /* ─── Content Wrapper ─── */
+  .content { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 20px; }
+
+  /* ─── Header ─── */
+  header {
+    padding: 50px 0 30px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, transparent 100%);
+  }
+  header h1 {
+    font-size: 3em;
+    font-weight: 900;
+    background: linear-gradient(135deg, #00e676, #448aff, #b388ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1.5px;
+    margin-bottom: 10px;
+    animation: titleGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes titleGlow {
+    0% { filter: drop-shadow(0 0 10px rgba(0,230,118,0.2)); }
+    100% { filter: drop-shadow(0 0 20px rgba(68,138,255,0.3)); }
+  }
+  header p {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+    font-weight: 300;
+  }
+  .city-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 8px 22px;
+    background: var(--green-dim);
+    border: 1px solid rgba(0,230,118,0.25);
+    border-radius: 100px;
+    color: var(--green);
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+  }
+  .city-badge .dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* ─── Pipeline Status ─── */
+  .pipeline-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0;
+    flex-wrap: wrap;
+  }
+  .pipe-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .pipe-step.done {
+    background: var(--green-dim);
+    border-color: rgba(0,230,118,0.3);
+    color: var(--green);
+  }
+  .pipe-step.active {
+    background: var(--blue-dim);
+    border-color: rgba(68,138,255,0.3);
+    color: var(--blue);
+    animation: pipePulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pipePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(68,138,255,0.2); }
+    50% { box-shadow: 0 0 15px 2px rgba(68,138,255,0.3); }
+  }
+  .pipe-arrow { color: var(--text-muted); font-size: 0.8em; }
+
+  /* ─── Stats Bar ─── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    padding: 24px 0;
+  }
+  .stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    text-align: center;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    transition: all 0.3s;
+  }
+  .stat-card.total::before { background: var(--blue); }
+  .stat-card.leads::before { background: var(--green); }
+  .stat-card.filtered::before { background: var(--red); }
+  .stat-card.uncertain::before { background: var(--yellow); }
+  .stat-card.categories::before { background: var(--purple); }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-light);
+  }
+  .stat-card.total:hover { box-shadow: var(--blue-glow); }
+  .stat-card.leads:hover { box-shadow: var(--green-glow); }
+
+  .stat-card .number {
+    font-size: 2.4em;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .stat-card.total .number { color: var(--blue); }
+  .stat-card.leads .number { color: var(--green); }
+  .stat-card.filtered .number { color: var(--red); }
+  .stat-card.uncertain .number { color: var(--yellow); }
+  .stat-card.categories .number { color: var(--purple); }
+
+  .stat-card .label {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+  .stat-card .sub-label {
+    font-size: 0.65em;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ─── Category Breakdown ─── */
+  .category-breakdown {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .category-breakdown h3 {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .cat-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    animation: barGrow 0.6s ease both;
+  }
+  .cat-bar-row .cat-name {
+    min-width: 130px;
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    text-align: right;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cat-bar-row .cat-bar-track {
+    flex: 1;
+    height: 22px;
+    background: var(--bg-card);
+    border-radius: 11px;
+    overflow: hidden;
+    position: relative;
+  }
+  .cat-bar-row .cat-bar-fill {
+    height: 100%;
+    border-radius: 11px;
+    background: linear-gradient(90deg, var(--green), #00c853);
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  .cat-bar-row .cat-bar-fill.has-site-fill {
+    background: linear-gradient(90deg, var(--red), #ff1744);
+  }
+  .cat-bar-row .cat-count {
+    min-width: 40px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+  }
+  @keyframes barGrow {
+    from { opacity: 0; transform: scaleX(0.95); }
+    to { opacity: 1; transform: scaleX(1); }
+  }
+
+  /* ─── Filters ─── */
+  .filters {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filters input[type="text"] {
+    flex: 1;
+    min-width: 220px;
+    padding: 12px 18px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.9em;
+    font-family: inherit;
+    transition: all 0.3s;
+  }
+  .filters input[type="text"]:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: var(--blue-glow);
+  }
+  .filters input[type="text"]::placeholder { color: var(--text-muted); }
+
+  .filter-btn {
+    padding: 9px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8em;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.25s;
+  }
+  .filter-btn:hover {
+    border-color: var(--border-light);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+  .filter-btn.active {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+  .filter-btn.lead-filter.active {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ─── Lead Grid ─── */
+  .lead-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 14px;
+    padding-bottom: 60px;
+  }
+
+  /* ─── Lead Card ─── */
+  .lead-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.5s ease both;
+  }
+  .lead-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: var(--radius) 0 0 var(--radius);
+    transition: all 0.3s;
+  }
+  .lead-card.lead::before { background: var(--green); box-shadow: 0 0 15px rgba(0,230,118,0.3); }
+  .lead-card.has-site::before { background: var(--red); }
+  .lead-card.uncertain::before { background: var(--yellow); }
+
+  .lead-card:hover {
+    transform: translateY(-5px);
+    background: var(--bg-card-hover);
+    border-color: var(--border-light);
+  }
+  .lead-card.lead:hover { box-shadow: 0 8px 35px rgba(0,230,118,0.12); }
+  .lead-card.has-site:hover { box-shadow: 0 8px 35px rgba(255,82,82,0.08); }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(25px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .card-header h3 {
+    font-size: 1em;
+    font-weight: 600;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .confidence-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75em;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .confidence-badge.high { background: var(--green-dim); color: var(--green); }
+  .confidence-badge.medium { background: var(--yellow-dim); color: var(--yellow); }
+  .confidence-badge.low { background: var(--red-dim); color: var(--red); }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .card-meta .tag {
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    font-size: 0.7em;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .card-meta .tag.category {
+    background: var(--blue-dim);
+    color: var(--blue);
+    border: 1px solid rgba(68,138,255,0.15);
+  }
+  .card-meta .tag.rating {
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border: 1px solid rgba(255,213,79,0.15);
+  }
+  .card-meta .tag.verdict-lead {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid rgba(0,230,118,0.15);
+  }
+  .card-meta .tag.verdict-has {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid rgba(255,82,82,0.15);
+  }
+  .card-meta .tag.verdict-uncertain {
+    background: var(--yellow-dim);
+    color: var(--yellow);
+    border: 1px solid rgba(255,213,79,0.15);
+  }
+
+  .card-phone {
+    font-size: 0.85em;
+    color: var(--green);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .card-phone a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .card-phone a:hover { text-decoration: underline; }
+
+  .card-address {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  /* ─── Expanded Details ─── */
+  .card-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+  }
+  .lead-card.expanded .card-details {
+    max-height: 800px;
+    opacity: 1;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .card-details .detail-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 7px;
+    font-size: 0.8em;
+    line-height: 1.5;
+  }
+  .card-details .detail-row .label {
+    color: var(--text-muted);
+    min-width: 85px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .card-details .detail-row .value {
+    color: var(--text-secondary);
+    word-break: break-all;
+  }
+  .card-details .detail-row .value a {
+    color: var(--blue);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .card-details .detail-row .value a:hover {
+    color: #6699ff;
+    text-decoration: underline;
+  }
+
+  /* ─── Phase Badges ─── */
+  .phase-badges {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .phase-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.6em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    border: 1px solid transparent;
+  }
+  .phase-badge.passed {
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: rgba(0,230,118,0.2);
+  }
+  .phase-badge.failed {
+    background: var(--red-dim);
+    color: var(--red);
+    border-color: rgba(255,82,82,0.2);
+  }
+
+  .evidence-box {
+    margin-top: 8px;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.7em;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-height: 150px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .evidence-box::-webkit-scrollbar { width: 4px; }
+  .evidence-box::-webkit-scrollbar-track { background: transparent; }
+  .evidence-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .expand-icon {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-muted);
+    font-size: 0.8em;
+  }
+  .lead-card.expanded .expand-icon { transform: rotate(180deg); }
+
+  /* ─── Cross-City Flag ─── */
+  .cross-city-warning {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--yellow-dim);
+    border: 1px solid rgba(255,213,79,0.2);
+    border-radius: var(--radius-sm);
+    font-size: 0.75em;
+    color: var(--yellow);
+  }
+
+  /* ─── Loading ─── */
+  .loading {
+    text-align: center;
+    padding: 80px 0;
+    color: var(--text-muted);
+  }
+  .loading .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 18px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── Empty ─── */
+  .empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+    grid-column: 1 / -1;
+  }
+  .empty .icon { font-size: 3em; margin-bottom: 14px; }
+  .empty p { font-size: 1em; }
+
+  /* ─── Export Button ─── */
+  .export-btn {
+    padding: 9px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8em;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.25s;
+    margin-left: auto;
+  }
+  .export-btn:hover {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+    transform: translateY(-1px);
+  }
+
+  /* ─── Footer ─── */
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-muted);
+    font-size: 0.75em;
+    border-top: 1px solid var(--border);
+    line-height: 1.8;
+  }
+  footer .pipeline-ref {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  footer .pipeline-ref span {
+    color: var(--text-secondary);
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    header h1 { font-size: 2em; }
+    .content { padding: 0 14px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-card { padding: 16px; }
+    .stat-card .number { font-size: 1.8em; }
+    .lead-grid { grid-template-columns: 1fr; gap: 12px; }
+    .cat-bar-row .cat-name { min-width: 80px; font-size: 0.7em; }
+    .filters input[type="text"] { min-width: 160px; }
+    .pipeline-bar { gap: 4px; }
+    .pipe-step { font-size: 0.6em; padding: 4px 10px; }
+  }
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.5em; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .cat-bar-row { flex-wrap: wrap; gap: 4px; }
+    .cat-bar-row .cat-name { min-width: 100%; text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-grid"></div>
+<div class="bg-particles" id="particles"></div>
+<div class="glow-orb g1"></div>
+<div class="glow-orb g2"></div>
+<div class="glow-orb g3"></div>
+
+<header>
+  <div class="content">
+    <h1>🔍 Lead Gen Dashboard</h1>
+    <p>Businesses without websites — verified through 5-phase protocol</p>
+    <div class="city-badge">
+      <span class="dot"></span>
+      📍 <span id="cityName">Lucknow</span>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+  <!-- Pipeline Status -->
+  <div class="pipeline-bar" id="pipelineBar">
+    <span class="pipe-step done">🕵️ Discovery</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-step active">🔬 Verification</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-step">📊 Dashboard</span>
+    <span class="pipe-arrow">→</span>
+    <span class="pipe-step">🚀 Deployed</span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card total">
+      <div class="number" id="statTotal">0</div>
+      <div class="label">Total Businesses</div>
+      <div class="sub-label" id="subTotal">scraped from Google Maps</div>
+    </div>
+    <div class="stat-card leads">
+      <div class="number" id="statLeads">0</div>
+      <div class="label">🏆 No Website</div>
+      <div class="sub-label" id="subLeads">verified leads ready</div>
+    </div>
+    <div class="stat-card filtered">
+      <div class="number" id="statHasSite">0</div>
+      <div class="label">Has Website</div>
+      <div class="sub-label" id="subHasSite">filtered out</div>
+    </div>
+    <div class="stat-card uncertain">
+      <div class="number" id="statUncertain">0</div>
+      <div class="label">❓ Uncertain</div>
+      <div class="sub-label">needs manual check</div>
+    </div>
+    <div class="stat-card categories">
+      <div class="number" id="statCategories">0</div>
+      <div class="label">Categories</div>
+      <div class="sub-label" id="subCategories">business types</div>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="category-breakdown" id="categoryBreakdown">
+    <h3>📊 Category Breakdown — Leads by Business Type</h3>
+    <div id="catBars"></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters" id="filters">
+    <input type="text" id="searchInput" placeholder="🔍 Search business name, phone, address...">
+    <button class="filter-btn lead-filter active" data-filter="lead">🏆 Leads</button>
+    <button class="filter-btn" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="has-site">Has Site</button>
+    <button class="filter-btn" data-filter="uncertain">Uncertain</button>
+    <div id="categoryFilters" style="display:inline-flex;gap:6px;flex-wrap:wrap;"></div>
+    <button class="export-btn" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+
+  <!-- Lead Grid -->
+  <div id="leadGrid" class="lead-grid">
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      <p>Loading verified leads data...</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Generated by <strong>Hermes Agent Lead Gen Pipeline</strong>
+  <div class="pipeline-ref">
+    <span>🕵️ Google Maps Discovery</span>
+    <span>→</span>
+    <span>🔬 5-Phase Verification</span>
+    <span>→</span>
+    <span>📍 Entity Matching</span>
+    <span>→</span>
+    <span>📊 Interactive Dashboard</span>
+  </div>
+</footer>
+
+<script>
+// ─── Particles ──────────────────────────────────────────────────────
+(function() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.width = (Math.random() * 3 + 1) + 'px';
+    p.style.height = p.style.width;
+    p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+    p.style.animationDelay = (Math.random() * 20) + 's';
+    p.style.opacity = Math.random() * 0.3 + 0.1;
+    container.appendChild(p);
+  }
+})();
+
+// ─── State ──────────────────────────────────────────────────────────
+let allData = [];
+let currentFilter = 'lead';
+let currentCategory = 'all';
+let searchQuery = '';
+
+// ─── Load CSV ───────────────────────────────────────────────────────
+async function loadData() {
+  const csvUrl = 'lucknow_verified.csv';
+
+  try {
+    const resp = await fetch(csvUrl + '?t=' + Date.now());
+    const csvText = await resp.text();
+    const lines = csvText.trim().split('\n');
+
+    if (lines.length < 2) {
+      document.getElementById('loadingState').innerHTML = `
+        <div class="empty">
+          <div class="icon">📂</div>
+          <p>No data loaded yet. Run the discovery + verification pipeline first.</p>
+        </div>`;
+      return;
+    }
+
+    const headers = parseCSVLine(lines[0]).map(h => h.trim().replace(/^"|"$/g, ''));
+    const data = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const row = parseCSVLine(lines[i]);
+      if (row.length >= headers.length) {
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = (row[idx] || '').trim().replace(/^"|"$/g, ''); });
+        obj.phone = obj.phone ? obj.phone.replace(/[^\d+\s]/g, '') : '';
+        data.push(obj);
+      }
+    }
+
+    allData = data;
+    document.getElementById('loadingState').remove();
+    render();
+
+  } catch (err) {
+    document.getElementById('loadingState').innerHTML = `
+      <div class="empty">
+        <div class="icon">⚠️</div>
+        <p>Error loading data: ${err.message}</p>
+      </div>`;
+  }
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === ',' && !inQuotes) { result.push(current); current = ''; }
+    else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
+
+// ─── Render ─────────────────────────────────────────────────────────
+function render() {
+  const filtered = getFilteredData();
+  updateStats();
+  renderCategoryBars();
+  renderCards(filtered);
+  updateCategoryFilters();
+}
+
+function getFilteredData() {
+  return allData.filter(item => {
+    if (currentFilter === 'lead' && item.verdict !== 'no_website') return false;
+    if (currentFilter === 'has-site' && item.verdict !== 'has_website') return false;
+    if (currentFilter === 'uncertain' && item.verdict !== 'uncertain') return false;
+
+    const cat = (item.category || '').toLowerCase();
+    if (currentCategory !== 'all' && !cat.includes(currentCategory)) return false;
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const name = (item.name || '').toLowerCase();
+      const phone = (item.phone || '').toLowerCase();
+      const address = (item.address || '').toLowerCase();
+      const evidence = (item.evidence || '').toLowerCase();
+      if (!name.includes(q) && !phone.includes(q) && !address.includes(q) && !evidence.includes(q)) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
+function updateStats() {
+  const total = allData.length;
+  const leads = allData.filter(d => d.verdict === 'no_website').length;
+  const hasSite = allData.filter(d => d.verdict === 'has_website').length;
+  const uncertain = allData.filter(d => d.verdict === 'uncertain').length;
+  const categories = [...new Set(allData.map(d => (d.category || '').trim()).filter(Boolean))].length;
+
+  animateNumber('statTotal', total);
+  animateNumber('statLeads', leads);
+  animateNumber('statHasSite', hasSite);
+  animateNumber('statUncertain', uncertain);
+  animateNumber('statCategories', categories);
+}
+
+function animateNumber(id, target) {
+  const el = document.getElementById(id);
+  const current = parseInt(el.textContent) || 0;
+  if (current === target) return;
+
+  const duration = 1000;
+  const start = performance.now();
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.round(current + (target - current) * eased);
+    el.textContent = value;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ─── Category Breakdown Bars ──────────────────────────────────────
+function renderCategoryBars() {
+  const cats = {};
+  allData.forEach(d => {
+    const cat = (d.category || 'Unknown').trim();
+    if (!cats[cat]) cats[cat] = { total: 0, no_website: 0, has_website: 0, uncertain: 0 };
+    cats[cat].total++;
+    if (d.verdict === 'no_website') cats[cat].no_website++;
+    else if (d.verdict === 'has_website') cats[cat].has_website++;
+    else if (d.verdict === 'uncertain') cats[cat].uncertain++;
+  });
+
+  const sorted = Object.entries(cats).sort((a, b) => b[1].total - a[1].total);
+  const maxTotal = sorted.length > 0 ? sorted[0][1].total : 1;
+
+  let html = '';
+  sorted.forEach(([cat, counts], idx) => {
+    const pct = (counts.no_website / maxTotal) * 100;
+    const hasPct = (counts.has_website / maxTotal) * 100;
+
+    html += `
+      <div class="cat-bar-row" style="animation-delay:${idx * 0.05}s">
+        <span class="cat-name">${escapeHtml(cat)}</span>
+        <div class="cat-bar-track" title="${counts.total} businesses">
+          <div class="cat-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="cat-count">${counts.no_website}</span>
+      </div>`;
+  });
+
+  document.getElementById('catBars').innerHTML = html || '<p style="color:var(--text-muted);font-size:0.8em;">No category data</p>';
+}
+
+// ─── Cards ─────────────────────────────────────────────────────────
+function renderCards(items) {
+  const grid = document.getElementById('leadGrid');
+
+  if (items.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="icon">🔍</div>
+        <p>No businesses match your filters</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = items.map((item, idx) => {
+    const verdict = item.verdict || '';
+    const conf = parseInt(item.confidence) || 0;
+    const confClass = conf >= 80 ? 'high' : conf >= 55 ? 'medium' : 'low';
+
+    const verClass = verdict === 'no_website' ? 'lead' : verdict === 'has_website' ? 'has-site' : 'uncertain';
+    const verLabel = verdict === 'no_website' ? '🏆 Lead' : verdict === 'has_website' ? '❌ Has Site' : '❓ Uncertain';
+    const verTagClass = verdict === 'no_website' ? 'verdict-lead' : verdict === 'has_website' ? 'verdict-has' : 'verdict-uncertain';
+
+    const phone = item.phone ? formatPhone(item.phone) : '';
+    const rating = item.rating ? `⭐ ${item.rating}` : '';
+
+    const catTag = item.category ? `<span class="tag category">${escapeHtml(item.category)}</span>` : '';
+    const ratingTag = rating ? `<span class="tag rating">${rating}</span>` : '';
+
+    const address = item.address ? escapeHtml(item.address.substring(0, 120)) : '';
+    const evidence = item.evidence ? escapeHtml(item.evidence.substring(0, 600)) : '';
+
+    // Phase badges
+    const phases = parseInt(item.phases_completed) || 0;
+    let phaseHtml = '';
+    if (phases > 0) {
+      phaseHtml = '<div class="phase-badges">';
+      for (let p = 1; p <= 5; p++) {
+        phaseHtml += `<span class="phase-badge ${p <= phases ? 'passed' : ''}">P${p}</span>`;
+      }
+      phaseHtml += '</div>';
+    }
+
+    const domain = item.domain ? escapeHtml(item.domain) : '';
+    const websiteFound = item.website_found ? escapeHtml(item.website_found) : '';
+    const gmapsUrl = item.gmaps_url ? escapeHtml(item.gmaps_url) : '';
+    const crossCityFlags = item.cross_city_flags ? item.cross_city_flags : '';
+
+    return `
+      <div class="lead-card ${verClass}" onclick="toggleCard(this)" style="animation-delay:${(idx % 15) * 0.04}s">
+        <div class="card-header">
+          <h3>${escapeHtml(item.name || 'Unknown')}</h3>
+          <span class="confidence-badge ${confClass}">${conf}%</span>
+        </div>
+        <div class="card-meta">
+          ${catTag}
+          ${ratingTag}
+          <span class="tag ${verTagClass}">${verLabel}</span>
+          <span class="tag">${phases}/5 phases</span>
+        </div>
+        ${phone ? `<div class="card-phone">📞 <a href="tel:${phone.replace(/\s/g,'')}">${phone}</a></div>` : ''}
+        ${address ? `<div class="card-address">📍 ${address}</div>` : ''}
+
+        <div class="card-details">
+          ${phaseHtml}
+          ${domain ? `<div class="detail-row"><span class="label">Domain</span><span class="value">${domain}</span></div>` : ''}
+          ${websiteFound ? `<div class="detail-row"><span class="label">Website</span><span class="value"><a href="${websiteFound}" target="_blank" rel="noopener">${websiteFound}</a></span></div>` : ''}
+          ${gmapsUrl ? `<div class="detail-row"><span class="label">Google Maps</span><span class="value"><a href="${gmapsUrl}" target="_blank" rel="noopener">View on Maps →</a></span></div>` : ''}
+          ${address ? `<div class="detail-row"><span class="label">Address</span><span class="value">${escapeHtml(item.address)}</span></div>` : ''}
+          ${item.city ? `<div class="detail-row"><span class="label">City</span><span class="value">${escapeHtml(item.city)}</span></div>` : ''}
+          ${crossCityFlags && crossCityFlags !== 'all' ? `<div class="cross-city-warning">⚠️ Same-name business detected in another city — entity mismatch flagged</div>` : ''}
+          <div class="evidence-box">📋 ${evidence || 'No evidence recorded'}</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+          <span style="font-size:0.65em;color:var(--text-muted);">Click to ${document.querySelector('.lead-card.expanded') ? 'collapse' : 'expand'} details</span>
+          <span class="expand-icon">▼</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleCard(el) {
+  // Close other open cards
+  document.querySelectorAll('.lead-card.expanded').forEach(c => {
+    if (c !== el) c.classList.remove('expanded');
+  });
+  el.classList.toggle('expanded');
+}
+
+function formatPhone(p) {
+  let cleaned = p.replace(/[^\d+]/g, '');
+  if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    return '+' + cleaned.slice(0, 2) + ' ' + cleaned.slice(2, 7) + ' ' + cleaned.slice(7);
+  }
+  if (cleaned.length === 10) {
+    return '+91 ' + cleaned.slice(0, 5) + ' ' + cleaned.slice(5);
+  }
+  return p;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ─── Category Filter Buttons ────────────────────────────────────────
+function updateCategoryFilters() {
+  const cats = [...new Set(allData.map(d => (d.category || '').trim()).filter(Boolean))].sort();
+  const container = document.getElementById('categoryFilters');
+
+  let html = `<button class="filter-btn ${currentCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">All Cats</button>`;
+
+  cats.forEach(cat => {
+    const active = currentCategory === cat.toLowerCase() ? 'active' : '';
+    html += `<button class="filter-btn ${active}" onclick="setCategory('${escAttr(cat.toLowerCase())}')">${escapeHtml(cat.substring(0, 22))}</button>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function escAttr(str) {
+  return str.replace(/['"]/g, '').replace(/[^a-z0-9\s\-]/gi, '');
+}
+
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('#categoryFilters .filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+// ─── Export CSV ────────────────────────────────────────────────────
+function exportCSV() {
+  if (allData.length === 0) return;
+
+  const headers = Object.keys(allData[0]);
+  let csv = headers.join(',') + '\n';
+
+  const filtered = getFilteredData();
+  filtered.forEach(row => {
+    csv += headers.map(h => {
+      let val = (row[h] || '').toString();
+      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+        val = '"' + val.replace(/"/g, '""') + '"';
+      }
+      return val;
+    }).join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lucknow_leads_export.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Event Listeners ───────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchQuery = this.value;
+  render();
+});
+
+document.querySelectorAll('#filters > .filter-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#filters > .filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentFilter = this.dataset.filter;
+    render();
+  });
+});
+
+// ─── Keyboard shortcut ─────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+    const input = document.getElementById('searchInput');
+    if (document.activeElement !== input) {
+      e.preventDefault();
+      input.focus();
+    }
+  }
+  // Escape to clear search
+  if (e.key === 'Escape') {
+    const input = document.getElementById('searchInput');
+    if (document.activeElement === input) {
+      input.value = '';
+      searchQuery = '';
+      render();
+      input.blur();
+    }
+  }
+});
+
+// ─── Init ──────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
